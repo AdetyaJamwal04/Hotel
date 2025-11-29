@@ -128,21 +128,13 @@ jobs:
         echo "==================================="
         echo "ML Pipeline Execution Summary"
         echo "==================================="
-        
+        echo ""
+        echo "Pipeline completed successfully!"
+        echo ""
         if [ -f "logs/evaluation_report.json" ]; then
-          python -c "
-          import json
-          with open('logs/evaluation_report.json') as f:
-              results = json.load(f)
-          
-          print('\nModel Performance:')
-          for model, metrics in results.items():
-              print(f'\n{model}:')
-              print(f'  Accuracy:  {metrics[\"accuracy\"]:.4f}')
-              print(f'  Precision: {metrics[\"precision\"]:.4f}')
-              print(f'  Recall:    {metrics[\"recall\"]:.4f}')
-              print(f'  F1-Score:  {metrics[\"f1_score\"]:.4f}')
-              if metrics.get('roc_auc'):
-                  print(f'  ROC-AUC:   {metrics[\"roc_auc\"]:.4f}')
-          "
+          echo "Evaluation report generated:"
+          cat logs/evaluation_report.json
         fi
+        echo ""
+        echo "Check the 'pipeline-logs' artifact for detailed results"
+
