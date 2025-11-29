@@ -10,12 +10,38 @@ A complete end-to-end machine learning pipeline to predict hotel booking cancell
 
 - [Project Overview](#project-overview)
 - [Features](#features)
+- [Documentation](#documentation)
 - [Project Structure](#project-structure)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Model Deployment](#model-deployment)
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Results](#results)
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the `docs/` directory:
+
+- **[📖 Quick Start Guide](docs/QUICK_START.md)** - Get up and running in 5 minutes
+- **[📋 API Reference](docs/API_REFERENCE.md)** - Complete API documentation for all modules
+- **[👨‍💻 Developer Guide](docs/DEVELOPER_GUIDE.md)** - Development setup, architecture, and best practices
+- **[🚀 Deployment Guide](docs/DEPLOYMENT_GUIDE.md)** - Deploy to local, cloud, or production environments
+- **[🤝 Contributing Guidelines](CONTRIBUTING.md)** - How to contribute to the project
+
+### Quick Links
+
+- **New to the project?** Start with the [Quick Start Guide](docs/QUICK_START.md)
+- **Using the API?** Check the [API Reference](docs/API_REFERENCE.md)
+- **Setting up for development?** Read the [Developer Guide](docs/DEVELOPER_GUIDE.md)
+- **Ready to deploy?** Follow the [Deployment Guide](docs/DEPLOYMENT_GUIDE.md)
+- **Want to contribute?** See [Contributing Guidelines](CONTRIBUTING.md)
+
+## 📊 Reports
+
+Comprehensive analysis and results:
+
+- **[📈 Exploratory Data Analysis](reports/EXPLORATORY_DATA_ANALYSIS.md)** - Complete EDA with insights and recommendations
+- **[📋 Final Technical Report](reports/FINAL_TECHNICAL_REPORT.md)** - Model performance, results, and business impact
 
 ## 🎯 Project Overview
 
