@@ -1,0 +1,148 @@
+name: Hotel Booking ML Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  ml-pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Verify data file exists
+      run: |
+        if [ ! -f "data/raw/Hotel_Reservations.csv" ]; then
+          echo "Error: Dataset not found!"
+          exit 1
+        fi
+        echo "Dataset found: data/raw/Hotel_Reservations.csv"
+    
+    - name: Validate dataset schema
+      run: |
+        python -c "
+        import pandas as pd
+        import sys
+        
+        df = pd.read_csv('data/raw/Hotel_Reservations.csv')
+        expected_cols = [
+            'Booking_ID', 'no_of_adults', 'no_of_children', 'no_of_weekend_nights',
+            'no_of_week_nights', 'type_of_meal_plan', 'required_car_parking_space',
+            'room_type_reserved', 'lead_time', 'arrival_year', 'arrival_month',
+            'arrival_date', 'market_segment_type', 'repeated_guest',
+            'no_of_previous_cancellations', 'no_of_previous_bookings_not_canceled',
+            'avg_price_per_room', 'no_of_special_requests', 'booking_status'
+        ]
+        
+        missing = set(expected_cols) - set(df.columns)
+        if missing:
+            print(f'ERROR: Missing columns: {missing}')
+            sys.exit(1)
+        
+        print('Schema validation passed!')
+        print(f'Dataset shape: {df.shape}')
+        "
+    
+    - name: Run ML Pipeline (without hyperparameter tuning)
+      run: |
+        python main.py \
+          --data-path data/raw/Hotel_Reservations.csv \
+          --test-size 0.2 \
+          --use-smote \
+          --metric f1_score \
+          --model-dir models \
+          --log-dir logs
+      timeout-minutes: 30
+    
+    - name: Verify model saved
+      run: |
+        if [ ! -f "models/best_model.pkl" ]; then
+          echo "Error: Best model not saved!"
+          exit 1
+        fi
+        echo "Model file found: models/best_model.pkl"
+        ls -lh models/
+    
+    - name: Test model loading
+      run: |
+        python -c "
+        import joblib
+        import sys
+        
+        try:
+            model = joblib.load('models/best_model.pkl')
+            print(f'Model loaded successfully!')
+            print(f'Model type: {type(model).__name__}')
+        except Exception as e:
+            print(f'ERROR loading model: {e}')
+            sys.exit(1)
+        "
+    
+    - name: Verify evaluation outputs
+      run: |
+        # Check for evaluation report
+        if [ ! -f "logs/evaluation_report.json" ]; then
+          echo "Warning: Evaluation report not found"
+        fi
+        
+        # Check for visualizations
+        if [ ! -f "logs/confusion_matrices.png" ]; then
+          echo "Warning: Confusion matrices not found"
+        fi
+        
+        echo "Pipeline outputs:"
+        ls -la logs/
+    
+    - name: Upload model artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: trained-models
+        path: models/
+        retention-days: 30
+    
+    - name: Upload logs and reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: pipeline-logs
+        path: logs/
+        retention-days: 30
+    
+    - name: Display pipeline summary
+      run: |
+        echo "==================================="
+        echo "ML Pipeline Execution Summary"
+        echo "==================================="
+        
+        if [ -f "logs/evaluation_report.json" ]; then
+          python -c "
+          import json
+          with open('logs/evaluation_report.json') as f:
+              results = json.load(f)
+          
+          print('\nModel Performance:')
+          for model, metrics in results.items():
+              print(f'\n{model}:')
+              print(f'  Accuracy:  {metrics[\"accuracy\"]:.4f}')
+              print(f'  Precision: {metrics[\"precision\"]:.4f}')
+              print(f'  Recall:    {metrics[\"recall\"]:.4f}')
+              print(f'  F1-Score:  {metrics[\"f1_score\"]:.4f}')
+              if metrics.get('roc_auc'):
+                  print(f'  ROC-AUC:   {metrics[\"roc_auc\"]:.4f}')
+          "
+        fi
